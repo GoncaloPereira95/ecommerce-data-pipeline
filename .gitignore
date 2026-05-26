@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Spark
+derby.log
+metastore_db/
+
+# OS
+.DS_Store
+Thumbs.db
