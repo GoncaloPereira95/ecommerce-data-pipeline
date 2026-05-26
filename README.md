@@ -1,18 +1,20 @@
-# TechMart — Real-time Data Pipeline (Kappa Architecture)
+# Ecommerce Data Pipeline — Real-time Kappa Architecture
 
-> End-to-end streaming data platform for a fictional e-commerce retailer, built as a group project for a Big Data Architecture course. Implements a Kappa architecture with real-time fraud detection, data quality validation, and pipeline observability.
+> Group project built for a Big Data Architecture course. Real-time streaming pipeline for a fictional e-commerce platform using Kafka, Spark Structured Streaming, PyDeequ, InfluxDB and Grafana.
 
 ---
 
-## Project Overview
+## What Was Built
 
-TechMart is an online electronics retailer with 10M registered users and 500K SKUs. The platform was redesigned to address three critical problems:
+A real-time data pipeline handling order events from ingestion to observability:
 
-- Inventory updated only nightly — causing oversells during promotions
-- Merchandising team working with day-old reports
-- No fraud detection — chargebacks growing 30% per year
-
-The solution is a **Kappa architecture** pipeline that keeps inventory and dashboards refreshed in near real-time, scores fraud at checkout, and serves product recommendations — all self-hosted with open-source tooling.
+- **Kafka** ingests order, click and inventory events
+- **Spark Structured Streaming** processes the stream — enrichment, data quality gate, fraud scoring
+- **PyDeequ** runs 12 data quality checks on every batch, producing a scored report
+- **PostgreSQL** stores orders, daily sales and top products
+- **Redis** serves as hot cache and fraud blocklist
+- **InfluxDB** collects pipeline metrics (throughput, latency, error rate, quality score)
+- **Grafana** visualises the pipeline in real-time
 
 ---
 
@@ -23,62 +25,15 @@ The solution is a **Kappa architecture** pipeline that keeps inventory and dashb
 | Event Streaming | Apache Kafka |
 | Stream Processing | Apache Spark Structured Streaming |
 | Data Quality | PySpark + PyDeequ |
-| Storage (OLTP + Analytics) | PostgreSQL |
-| Cache + Fraud Blocklist | Redis |
-| Pipeline Metrics | InfluxDB |
-| Observability Dashboard | Grafana |
-| Serving API | FastAPI |
-
----
-
-## Architecture
-
-**Pattern selected: Kappa**
-
-A single Spark Structured Streaming job consumes Kafka, applies the PyDeequ quality gate and rule-based fraud scorer, and writes to PostgreSQL and Redis. Pipeline metrics are pushed to InfluxDB and visualised in Grafana.
-
-```
-Sources (Storefront / Order Service / Inventory CDC)
-        |
-   Apache Kafka
-   (topics: orders, clicks, inventory)
-        |
-   Spark Structured Streaming
-   (enrich → PyDeequ DQ gate → fraud rules → aggregate)
-        |
-   ----------------+-----------------
-   |               |                |
-PostgreSQL       Redis           InfluxDB
-(orders,       (hot cache,     (pipeline metrics)
-daily_sales,   fraud blocklist)       |
-top_products)                     Grafana
-   |
-FastAPI (storefront /orders /recommend /fraud-check)
-```
-
-**Why Kappa over Lambda:**
-- Single codebase, one engine, one team
-- Kafka offset replay covers reprocessing — no separate batch path
-- Operational simplicity prioritised over absolute lowest latency
-
----
-
-## Pipeline Specifications
-
-| Metric | Target |
-|---|---|
-| End-to-end stream latency | < 10s |
-| Fraud check latency | < 200ms p95 |
-| Sustained throughput | 2K events/s |
-| Peak throughput | 10K events/s (5× headroom) |
-| Availability | 99.5% monthly |
-| Data quality gate | ≥ 90% constraint pass rate |
+| Storage | PostgreSQL + Redis |
+| Metrics | InfluxDB |
+| Observability | Grafana |
 
 ---
 
 ## Data Quality
 
-12 constraints implemented across 5 quality dimensions using **PyDeequ**:
+12 constraints across 5 dimensions implemented with PyDeequ:
 
 | Dimension | Checks |
 |---|---|
@@ -88,7 +43,7 @@ FastAPI (storefront /orders /recommend /fraud-check)
 | Consistency | total_amount = quantity × unit_price, status and payment_method in allow-lists |
 | Timeliness | order_date not in future, within last 5 years |
 
-**Latest run result: 100% — GREEN gate (12/12 constraints passed)**
+**Latest run: 100% score — GREEN gate (12/12 passed)**
 
 ---
 
@@ -96,30 +51,28 @@ FastAPI (storefront /orders /recommend /fraud-check)
 
 ![Grafana Dashboard](images/grafana_dashboard.png)
 
-Four panels monitoring the pipeline in real-time:
-- **Throughput** by component (records/s)
-- **Latency** by component (ms)
-- **Data Quality score** gauge (last value)
-- **Component summary** table (last 1h)
+Live Grafana dashboard monitoring:
+- Throughput by component (records/s)
+- Latency by component (ms)
+- Data quality score (gauge)
+- Component summary table (last 1h)
 
 ---
 
 ## Repository Structure
 
 ```
-techmart-pipeline/
+ecommerce-data-pipeline/
 |
 |-- data_quality.ipynb          # PySpark + PyDeequ data quality notebook
 |-- seed_metrics.py             # Seeds pipeline metrics into InfluxDB
 |-- grafana_dashboard.json      # Grafana dashboard (importable)
 |
 |-- quality_reports/
-|   |-- dq_results.json         # Latest DQ run output (100% GREEN)
+|   |-- dq_results.json         # Latest DQ run output
 |
 |-- images/
 |   |-- grafana_dashboard.png   # Live dashboard screenshot
-|
-|-- README.md
 ```
 
 ---
@@ -133,42 +86,16 @@ techmart-pipeline/
 docker compose up -d kafka influxdb grafana
 ```
 
-**2. Seed pipeline metrics**
+**2. Seed pipeline metrics into InfluxDB**
 ```bash
 python seed_metrics.py --hours 24 --url http://localhost:8086
 ```
 
 **3. Import the Grafana dashboard**
 - Open Grafana at `http://localhost:3000`
-- Go to Dashboards → Import → upload `grafana_dashboard.json`
+- Dashboards → Import → upload `grafana_dashboard.json`
 
 **4. Run the data quality notebook**
 ```bash
 jupyter notebook data_quality.ipynb
 ```
-
----
-
-## Key Design Decisions
-
-- **Kappa over Lambda** — single codebase, replay via Kafka offsets, no second batch path
-- **Rule-based fraud over ML** — no labelled fraud history; explainable rules as v1
-- **SQL materialised view for recommendations** — solves cold-start and popularity case without model artefacts
-- **Self-hosted over managed cloud** — estimated at ~€30/month vs ~€4,500/month for equivalent AWS managed services
-
----
-
-## Skills Demonstrated
-
-- Kappa architecture design and trade-off analysis
-- Apache Kafka event streaming
-- Spark Structured Streaming pipeline
-- Data quality engineering with PyDeequ (12 constraints, 5 dimensions)
-- Pipeline observability with InfluxDB + Grafana
-- Fraud detection rule engine
-- Python (PySpark, influxdb-client, FastAPI)
-- Cost estimation and scaling projections
-
----
-
-*Big Data Architecture project, ISEP 2026. Group project.*
