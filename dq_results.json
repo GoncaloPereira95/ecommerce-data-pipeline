@@ -1,0 +1,105 @@
+{
+  "run_id": "20260509T102510Z",
+  "scenario": "techmart",
+  "team": "techmart",
+  "score_pct": 100.0,
+  "gate": "GREEN",
+  "checks": [
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "CompletenessConstraint(Completeness(order_id,None,None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    },
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "CompletenessConstraint(Completeness(customer_id,None,None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    },
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "CompletenessConstraint(Completeness(product_id,None,None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    },
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "UniquenessConstraint(Uniqueness(List(order_id),None,None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    },
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "ComplianceConstraint(Compliance(O-5 quantity in [1,50],quantity BETWEEN 1 AND 50,None,List(),None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    },
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "ComplianceConstraint(Compliance(O-6 unit_price in (0,10000],unit_price BETWEEN 0.01 AND 10000,None,List(),None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    },
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "ComplianceConstraint(Compliance(total_amount is non-negative,COALESCE(CAST(total_amount AS DECIMAL(20,10)), 0.0) >= 0,None,List(total_amount),None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    },
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "ComplianceConstraint(Compliance(O-8 total = qty * unit_price,abs(total_amount - quantity * unit_price) < 0.01,None,List(),None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    },
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "ComplianceConstraint(Compliance(O-9 status in allow-list,status IN ('completed', 'cancelled', 'pending', 'shipped'),None,List(),None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    },
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "ComplianceConstraint(Compliance(O-10 payment_method in allow-list,payment_method IN ('credit_card', 'debit_card', 'paypal', 'bank_transfer'),None,List(),None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    },
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "ComplianceConstraint(Compliance(O-11 order_date not in future,order_date <= current_timestamp(),None,List(),None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    },
+    {
+      "check": "TechMart Orders Quality",
+      "check_level": "Error",
+      "check_status": "Success",
+      "constraint": "ComplianceConstraint(Compliance(O-12 order_date within 5 years,order_date >= add_months(current_timestamp(), -60),None,List(),None))",
+      "constraint_status": "Success",
+      "constraint_message": ""
+    }
+  ]
+}
